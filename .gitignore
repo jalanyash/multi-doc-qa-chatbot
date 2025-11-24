@@ -1,0 +1,17 @@
+# Environment
+.env
+venv/
+__pycache__/
+*.pyc
+# Data
+data/ 
+temp_*.pdf
+*.pdf
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Streamlit
+.streamlit/
