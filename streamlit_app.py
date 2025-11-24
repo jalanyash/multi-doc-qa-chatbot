@@ -666,13 +666,38 @@ def rebuild_vectorstore():
     """
     try:
         if st.session_state.all_documents:
-            with st.spinner("🔄 Rebuilding vector database..."):
-                st.session_state.vectorstore = FAISS.from_documents(
-                    documents=st.session_state.all_documents,
-                    embedding=embeddings
-                )
+            status_text = st.empty()
+            progress_bar = st.progress(0)
+            
+            total_docs = len(st.session_state.all_documents)
+            
+            status_text.info(f"🔄 Rebuilding vector database with {total_docs} chunks...")
+            progress_bar.progress(25)
+            
+            # OpenAI embeddings are faster (5-10 seconds typically)
+            status_text.warning(f"🧠 Generating embeddings for {total_docs} chunks... (5-15 seconds)")
+            progress_bar.progress(50)
+            
+            status_text.info("🗄️ Building vector index...")
+            progress_bar.progress(75)
+            
+            # Use the global embeddings variable (OpenAI)
+            st.session_state.vectorstore = FAISS.from_documents(
+                documents=st.session_state.all_documents,
+                embedding=embeddings  # ⭐ Uses your OpenAI embeddings
+            )
+            
+            progress_bar.progress(100)
+            status_text.success("✅ Vector database ready!")
+            
+            # Clear progress indicators after brief delay
+            time.sleep(1)
+            progress_bar.empty()
+            status_text.empty()
+            
         else:
             st.session_state.vectorstore = None
+            
     except Exception as e:
         st.error(f"❌ Failed to rebuild vector store: {str(e)}")
         st.session_state.vectorstore = None
